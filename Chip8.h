@@ -1,5 +1,6 @@
 #include <array>
 #include <cstdint>
+#include <random>
 #include <string>
 
 class Chip8 {
@@ -35,18 +36,25 @@ public:
   void cycle();
   void clearScreen();
   void draw(uint8_t x, uint8_t y, uint8_t n);
+  bool isKeyPressed(uint8_t key);
+  void setKey(uint8_t key, bool pressed);
+  void updateTimers();
 
   const std::array<uint8_t, DISPLAY_WIDTH * DISPLAY_HEIGHT> &getDisplay() const { return display; }
   std::array<uint8_t, KEYS> &getKeys() { return keypad; }
+
+  std::mt19937 rng;
 
 private:
   std::array<uint8_t, MEMORY_SIZE> memory{};
   std::array<uint8_t, VARIABLE_REGISTERS> V{};
   uint16_t I{};
   uint16_t PC{};
+  uint8_t sp;
   std::array<uint16_t, STACK_SIZE> stack{};
   uint8_t delay_timer{};
   uint8_t sound_timer{};
   std::array<uint8_t, KEYS> keypad;
+  std::array<uint8_t, KEYS> prevKeypad;
   std::array<uint8_t, DISPLAY_WIDTH * DISPLAY_HEIGHT> display{};
 };
