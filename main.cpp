@@ -1,3 +1,4 @@
+#include "Chip8.h"
 #include <SDL3/SDL.h>
 #include <SDL3/SDL_main.h>
 #include <array>
@@ -8,8 +9,14 @@ typedef struct {
 } App;
 
 int main(int argc, char *argv[]) {
-  App app = {0};
+  Chip8 chip8;
+  chip8.reset();
 
+  if (!chip8.loadROM("roms/ibm.ch8")) {
+    return 1;
+  }
+
+  App app = {0};
   if (!SDL_Init(SDL_INIT_VIDEO)) {
     SDL_Log("Couldn't initialize SDL: %s", SDL_GetError());
     return SDL_APP_FAILURE;
@@ -30,12 +37,6 @@ int main(int argc, char *argv[]) {
   }
 
   int running = 1;
-  std::array<int, 64 * 32> display{};
-  display[0] = 1;
-  display[3] = 1;
-  display[1] = 1;
-  display[64] = 1;
-  display[65] = 1;
   const int scale = 10;
   while (running) {
     SDL_Event event;
@@ -45,14 +46,16 @@ int main(int argc, char *argv[]) {
       }
     }
 
+    chip8.cycle();
+
     SDL_SetRenderDrawColor(app.renderer, 0, 0, 0, 255);
     SDL_RenderClear(app.renderer);
 
     SDL_SetRenderDrawColor(app.renderer, 255, 255, 255, 255);
 
-    for (int y = 0; y < 32; ++y) {
-      for (int x = 0; x < 64; ++x) {
-        if (display[y * 64 + x]) {
+    for (int y = 0; y < chip8.DISPLAY_HEIGHT; ++y) {
+      for (int x = 0; x < chip8.DISPLAY_WIDTH; ++x) {
+        if (chip8.getDisplay()[y * 64 + x]) {
           SDL_FRect rect = {
               static_cast<float>(x * scale),
               static_cast<float>(y * scale),
